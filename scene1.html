@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scene 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="scene1.css?v=3" />
+  <link rel="stylesheet" href="common.css?v=2">
+</head>
+<body>
+  <div class="center-box">
+    <div class="scene-wrapper">
+      <div class="scene-content" id="scene1">
+        <h1 class="top-text">
+          <span class="investigation-text">Investigation 1:</span>
+          <span class="social-media-text">Eli's Social Media Feed</span>
+        </h1>
+        <div class="content-split">
+          <div class="left-text">
+            <div id="typewriter-text"></div>
+            <p id="continuePrompt" class="continue-prompt">Press To Continue</p>
+          </div>
+          <div class="right-empty">
+            <img src="eli-missing-poster-final.png?v=1" alt="Eli's Poster" class="right-image"
+              onerror="this.style.display='none'; console.error('Image not found')" />
+          </div>
+        </div>
+      </div>
+
+      <div id="scene2" class="scene-content" style="display:none; opacity:0;">
+        <h1 class="final-title">Decipher The Suspicious Posts</h1>
+        <p class="final-subtitle">Click on all the posts that seem suspicious</p>
+        <div class="instagram-grid" id="postGrid">
+          <img src="post1.png" class="insta-post" data-id="1">
+          <img src="post2.png" class="insta-post" data-id="2">
+          <img src="post3.png" class="insta-post" data-id="3">
+          <img src="post4.png" class="insta-post" data-id="4">
+          <img src="post5.png" class="insta-post" data-id="5">
+          <img src="post6.png" class="insta-post" data-id="6">
+        </div>
+      </div>
+    </div>
+    <div id="scene3" class="scene-content" style="display: none; opacity: 0;">
+    <h1 id="fadeInTitle" class="fade-title">How are these posts suspicious?</h1>
+    <div class="flip-grid">
+  <div class="card-wrapper">
+    <div class="flip-container">
+      <div class="flip-card">
+        <div class="flip-card-front">
+          <div class="card-title">Locations Shown in Post</div>
+          <div class="tap-label">Tap me</div>
+        </div>
+        <div class="flip-card-back">Revealing your location can allow strangers to find or track you in real life.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="flip-container">
+      <div class="flip-card">
+        <div class="flip-card-front">
+        <div class="card-title">Personal Details Shared</div>
+        <div class="tap-label">Tap me</div>
+      </div>
+        <div class="flip-card-back">Oversharing names, school, or schedules can make you vulnerable to scams or stalking.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-wrapper">
+    <div class="flip-container">
+      <div class="flip-card">
+        <div class="flip-card-front">
+        <div class="card-title">Barcode Exposed in Post</div>
+        <div class="tap-label">Tap me</div>
+      </div>
+        <div class="flip-card-back">Exposed barcodes can lead strangers to steal your information, impersonate you, or even find out where you are.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="investigation-next-container">
+  <p id="afterFlipText" class="after-flip hidden">Let's dig deeper into the disappearance of Eli...</p>
+  <button id="investigation2Btn" class="continue-button inline after-flip hidden">Investigation 2</button>
+</div>
+
+
+
+
+</div>
+
+  </div>
+    <button id="continueBtn" class="continue-button">Continue</button>
+  </div>
+
+ 
+
+  <div id="toast" class="toast"></div>
+
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+    const centerBox = document.querySelector('.center-box');
+    centerBox.style.animation = 'fadeInOnly 1s ease-out forwards';
+  const textElement = document.getElementById('typewriter-text');
+  const continuePrompt = document.getElementById('continuePrompt');
+  const clickSound = document.getElementById('clickSound');
+   const suspiciousIds = ['4', '5', '6']
+   const clickedPosts = new Set();
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  let typeBuffer = null;
+  let hasPlayedClickSound = false;
+
+  const texts = [
+    "Eli has mysteriously gone missing after a series of suspicious posts were shared on his social media feed...",
+    "Authorities are scrambling to trace his digital footprint, but clues are vanishing as quickly as they appear.",
+    "You've been tasked to dig deeper - to uncover the truth behind his disappearance and decode the feed."
+  ];
+  let currentIndex = 0;
+
+  function typeWriterText(text, callback) {
+    textElement.innerHTML = '';
+    const paragraph = document.createElement('p');
+    paragraph.style.margin = '0 0 1rem 0';
+    const cursor = document.createElement('span');
+    cursor.className = 'typewriter-cursor';
+    paragraph.appendChild(cursor);
+    textElement.appendChild(paragraph);
+
+    let i = 0;
+    const speed = 30;
+    let source;
+
+    if (typeBuffer) {
+      source = audioContext.createBufferSource();
+      source.buffer = typeBuffer;
+      source.loop = true;
+      source.connect(audioContext.destination);
+      source.start();
+    }
+
+    function typeNextChar() {
+      if (i < text.length) {
+        const charSpan = document.createElement('span');
+        charSpan.textContent = text.charAt(i);
+        paragraph.insertBefore(charSpan, cursor);
+        i++;
+        setTimeout(typeNextChar, speed);
+      } else {
+        if (source) {
+          source.stop();
+          source.disconnect();
+        }
+        cursor.remove();
+        if
+(callback) callback();
+      }
+    }
+
+    typeNextChar();
+  }
+
+  function showNextText() {
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+
+    if (currentIndex < texts.length) {
+      continuePrompt.classList.remove('show');
+      typeWriterText(texts[currentIndex], () => {
+        continuePrompt.classList.add('show');
+      });
+      currentIndex++;
+    } else {
+      const scene1 = document.getElementById('scene1');
+      const scene2 = document.getElementById('scene2');
+      continuePrompt.classList.remove('show');
+      scene1.classList.add('fade-out');
+
+      setTimeout(() => {
+        scene1.style.display = 'none';
+        scene2.style.display = 'flex';
+        scene2.style.opacity = '1';
+
+
+        document.querySelectorAll('.insta-post').forEach(post => {
+  post.addEventListener('click', () => {
+    const continueBtn = document.getElementById('continueBtn');
+    if (continueBtn.style.display === 'inline-block') return;
+
+    const postId = post.getAttribute('data-id');
+
+    // 🔊 Only play sound if this post hasn't been clicked before
+    if (!clickedPosts.has(postId)) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+      clickedPosts.add(postId);
+    }
+
+    const isSuspicious = suspiciousIds.includes(postId);
+
+    // ✅ Prevent re-marking the same suspicious post
+    if (post.classList.contains('suspicious')) return;
+
+    post.classList.add('suspicious');
+
+    showToast(isSuspicious
+      ? "✅ Good eye! This post is suspicious."
+      : "❌ Hmm... this one doesn't seem suspicious. Try again."
+    );
+
+    const selectedSuspicious = Array.from(document.querySelectorAll('.insta-post.suspicious'))
+      .map(p => p.getAttribute('data-id'))
+      .filter(id => suspiciousIds.includes(id));
+
+    const allFound = suspiciousIds.every(id => selectedSuspicious.includes(id));
+
+    if (allFound) {
+      document.querySelectorAll('.insta-post').forEach(p => {
+        p.classList.add('no-click');
+      });
+
+      setTimeout (() => {
+        continueBtn.classList.add('show');
+      }, 2000);
+    }
+    setTimeout (() => {
+      document.getElementById('fadeInTitle').classList.add('visible');
+    }, 2300);
+  });
+});
+
+      }, 1000);
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('toast-show');
+    setTimeout(() => {
+      toast.classList.remove('toast-show');
+    }, 2000);
+  }
+
+  // Unlock audio on any user interaction
+  document.body.addEventListener('click', () => {
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }, { once: true });
+
+  // Fetch and decode audio, THEN show first text
+  fetch('typewriter-audio-final.mp3')
+    .then(response => response.arrayBuffer())
+    .then(data => audioContext.decodeAudioData(data))
+    .then(decoded => {
+      typeBuffer = decoded;
+      // Wait a few ms to ensure AudioContext can play right after decoding
+      setTimeout(() => {
+        showNextText(); // Show first message automatically
+      }, 100);
+    })
+    .catch(err => {
+      console.warn("Audio preload failed", err);
+      showNextText(); // fallback if audio doesn't load
+    });
+
+  continuePrompt.addEventListener('click', showNextText);
+
+  // Shuffle posts
+  const postGrid = document.getElementById("postGrid");
+  if (postGrid) {
+    const posts = Array.from(postGrid.children);
+    for (let i = posts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [posts[i], posts[j]] = [posts[j], posts[i]];
+    }
+    posts.forEach(post => postGrid.appendChild(post));
+  }
+
+  document.getElementById('continueBtn').addEventListener('click', () => {
+  const scene2 = document.getElementById('scene2');
+  const scene3 = document.getElementById('scene3');
+  const continueBtn = document.getElementById('continueBtn');
+
+  continueBtn.classList.remove('show');
+  continueBtn.classList.add('fade-out');
+
+  scene2.classList.add('fade-out');
+
+  setTimeout(() => {
+    scene2.style.display = 'none';
+    scene3.style.display = 'flex';
+
+    setTimeout(() => {
+      scene3.style.opacity = '1';
+      document.getElementById('fadeInTitle').classList.add('visible');
+    }, 100);
+  }, 1000);
+});
+
+const flipCards = document.querySelectorAll('.flip-card');
+const afterFlipText = document.getElementById('afterFlipText');
+
+flipCards.forEach(card => {
+  card.addEventListener('click', () => {
+    card.classList.toggle('flipped');
+
+    // ✅ Check if ALL cards are flipped
+    const allFlipped = Array.from(flipCards).every(c => c.classList.contains('flipped'));
+
+    if (allFlipped) {
+      afterFlipText.classList.add('visible');
+      document.getElementById('investigation2Btn').classList.add('visible');
+    }
+  });
+});
+
+document.getElementById('investigation2Btn').addEventListener('click', () => {
+    const button = document.getElementById('investigation2Btn');
+    const scene3 = document.getElementById('scene3');
+    const centerBox = document.querySelector('.center-box');
+    
+    // Apply fade-out animations
+    button.classList.add('fade-out');
+    scene3.classList.add('fade-out');
+    centerBox.classList.add('fade-out');
+    
+    // Wait for fade-out to complete before navigating
+    setTimeout(() => {
+        // Check if we're in an iframe (master.html) or standalone
+      window.location.href = 'scene4.html';
+ 
+    }, 1000); // Match this duration with your CSS transition time
+});
+
+
+
+
+});
+
+
+
+  </script>
+</body>
+</html>
